@@ -49,7 +49,13 @@ def auto_regist(i, user, n_user, shared_log):
         x_pos = col * width
         y_pos = row * height
 
-        s = Service(ChromeDriverManager().install())
+        try:
+            s = Service(ChromeDriverManager().install())
+        except:
+            try:
+                s = Service("chromedriver/chromedriver.exe")
+            except:
+                print("CHROME DRIVER ERROR")
         driver = webdriver.Chrome(service=s, options=options)
         driver.set_window_size(width, height)
         driver.set_window_position(x_pos, y_pos)
