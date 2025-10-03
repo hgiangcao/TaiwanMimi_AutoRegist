@@ -282,28 +282,42 @@ class App:
 		# bind selection
 		self.listbox.bind("<<ListboxSelect>>", self.show_details)
 
+	def read_google_sheet_csv(self,csv_url):
+		resp = requests.get(csv_url)
+		resp.raise_for_status()  # raise error if request fails
+
+		# Ensure UTF-8 decoding for Chinese characters
+		text = resp.content.decode('utf-8')  # decode bytes to string
+		f = io.StringIO(text)
+
+		reader = csv.reader(f)
+		rows = list(reader)
+		return rows
+
 	def get_user_from_csv(self):
 		keys = [
 			"register_date", "district", "address", "exam_date",
 			"time", "group", "arc", "birthday", "name", "phone", "email"
 		]
+		url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMfUPlcL32jW93PhYBCIBOPTj1iIZRzVBBqqPSh1rM4cpR56ss2aYWA1zJjmlfbq9IAbmw9p6RAbRB/pub?output=csv"
+		rows = self.read_google_sheet_csv(url)
+
+		data = rows[1:]
 		result = []
 		log = ""
 		count = 0
-		with open(self.file_csv, "r", encoding="utf-8") as f:
-			reader = csv.reader(f)
-			for row in reader:
-				entry = self.manager.dict()
-				new_entry = dict(zip(keys, row))
+		for row in data:
+			entry = self.manager.dict()
+			new_entry = dict(zip(keys, row))
 
-				for k,v in new_entry.items():
-					entry[k] = v
+			for k,v in new_entry.items():
+				entry[k] = v
 
-				entry['status']= ""
+			entry['status']= ""
 
-				self.shared_dict[entry['arc']] = entry
+			self.shared_dict[entry['arc']] = entry
 
-				count += 1
+			count += 1
 
 		self.show_details(None)
 
